@@ -127,7 +127,7 @@ function setup() {
   frameRate(30);
   background(0, 0, 0);
 
-  size = width / (6 * 8);
+  size = innerWidth / (6 * 8);
 
   setupBoards();
 }
@@ -194,6 +194,12 @@ class Board {
     }
   }
 
+  reset() {
+    for (let cell of this.cells) {
+      cell.reset();
+    }
+  }
+
   calculateNewState(x, y) {
     // count neighbour cells
     let startX = Math.max(0, x - 1);
@@ -249,7 +255,8 @@ class Board {
     rect(
       (this.currentIndex - 1) * this.size,
       this.size * this.board.length,
-      this.size
+      this.size,
+      this.size / 2
     );
 
     for (let cell of this.cells) {
@@ -353,6 +360,10 @@ class Cell {
     return hit;
   }
 
+  reset() {
+    this.state = 0;
+  }
+
   hitTest(x, y) {
     let posX = this.x + this.parent.x + this.parent.offset;
     let posY = this.y + this.parent.y + this.parent.offset;
@@ -420,6 +431,12 @@ function takeScreenshot() {
 }
 
 let boards = [];
+const resetButton = new Button(0, 0, "Reset", () => {
+  for (let board of boards) {
+    board.reset();
+  }
+  console.log("Reset");
+});
 const startButton = new Button(0, 0, "Start", () => {
   isRunning = !isRunning;
   if (isRunning) {
@@ -519,6 +536,10 @@ function draw() {
   startButton.y = height - startButton.height - 20;
   startButton.draw();
 
+  resetButton.x = startButton.x + 20 + resetButton.width;
+  resetButton.y = startButton.y;
+  resetButton.draw();
+
   for (let board of boards) {
     board.draw();
   }
@@ -540,6 +561,7 @@ Dark Purple: #33135c
 
 function mouseClicked() {
   startButton.click();
+  resetButton.click();
   if (!isToneStarted) {
     Tone.start();
     isToneStarted = true;
@@ -553,9 +575,9 @@ function mouseClicked() {
   // }
 }
 
-function touchEnded() {
-  mouseClicked();
-}
+// function touchEnded() {
+//   mouseClicked();
+// }
 
 function mouseDragged() {
   let cellHit = false;
